@@ -18,7 +18,7 @@ const userSchema = new mongoose.Schema({
         lowercase: true,
         trim: true
     },
-    fullname: {
+    fullName: {
         type: String,
         required: true,
         trim: true,
@@ -45,6 +45,7 @@ const userSchema = new mongoose.Schema({
     }
 },{timestamps: true})
 
+//pre middleware
 userSchema.pre("save", async function (next){
     if(this.isModified("password")){
         this.password = bcrypt.hash(this.password, 10); //encrypting the password 

@@ -28,7 +28,7 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    coverimage: {
+    coverImage: {
         type: String,
     },
     watchHistory: [{
@@ -46,11 +46,11 @@ const userSchema = new mongoose.Schema({
 },{timestamps: true})
 
 //pre middleware
-userSchema.pre("save", async function (next){
+userSchema.pre("save", async function (){
     if(this.isModified("password")){
-        this.password = bcrypt.hash(this.password, 10); //encrypting the password 
+        this.password = await bcrypt.hash(this.password, 10); //encrypting the password 
     }
-    next();
+    
 })
 
 userSchema.methods.isPasswordCorrect = async function name(password) {

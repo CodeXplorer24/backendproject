@@ -5,6 +5,11 @@ import cookieParser from "cookie-parser";
 
 const app = express();
 
+app.use((req, res, next) => {
+    console.log(`${req.method} request for ${req.url}`);
+    next();
+});
+
 
 // configurations
 app.use(cors({

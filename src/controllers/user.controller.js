@@ -200,4 +200,98 @@ const changeCurrPassword = asyncHandler(async(req,res) => {
     .status(200)
     .json(new ApiResponse(200,{},"Password is changed successfully"));
 })
-export {registerUser,loginUser,logoutUser,refrAccessToken};
+
+const getCurrUser = asyncHandler(async(req,res) => {
+    return res
+    .status(200)
+    .json(200,req.user,"Current user fetched successfully"); 
+})
+const updateAccDetails = asyncHandler (async(req,res) => {
+
+    const {fullName, email, username} = req.body;
+
+    if(!(fullName || email || username)){
+        throw new ApiError(400, "Fields can't be blank")
+    }
+    //return updated info of user from db 
+    const user =  await User.findByIdAndUpdate(
+        req.user?._id,
+        {
+            $set:{
+                fullName, email, username
+            }
+        },
+        {
+            new: true
+        }
+    ).select("-password -refreshToken");
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200,{},"Account updated successfully"))
+})
+
+const updateAvatar = asyncHandler(async(req,res) => {
+   
+    const avatarLocalPath = req.file?.path
+
+    if(!avatarLocalPath){
+        throw new ApiError(400, "missing file Avatar")
+    }
+
+    const avatar = await uploadOnCloudinary(avatarLocalPath);
+    if(!avatar.url){
+        throw new ApiError(400, "Error while uploading avatar")
+    }
+
+    const user =  User.findByIdAndUpdate(
+        req.user?._id,
+        {
+            $set: { avatar: avatar.url}
+        },
+        {
+            new: true
+        }
+    ).select("-password");
+
+    return res
+    .status(200)
+    .json(200,"Avatar changed successfully")
+    
+})
+
+const updateCoverImage = asyncHandler(async(req,res) => {
+    
+    const coverImageLocalPath = req.file?.path;
+    if(!coverImageLocalPath){
+        throw new ApiError(400, "cover image path missing");
+    }
+
+    const coverImage = await uploadOnCloudinary(coverImageLocalPath);
+    if(!coverImage.url){
+        throw new ApiError(400,"Error in uploading cover image");
+    }
+
+    const user = await User.findByIdAndUpdate(
+        req.user?._id,
+        {
+            coverImage: coverImage.url
+        },
+        {
+            new:true
+        }
+    ).select("-password");
+
+    return res
+    .status(200)
+    .json(200, "Cover image changed successfully");
+})
+export {registerUser,
+    loginUser,
+    logoutUser,
+    refrAccessToken,
+    changeCurrPassword,
+    getCurrUser,
+    updateAccDetails,
+    updateAvatar,
+};

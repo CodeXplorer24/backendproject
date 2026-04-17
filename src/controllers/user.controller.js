@@ -178,4 +178,26 @@ const refrAccessToken = asyncHandler(async(req,res) => {
     .cookie("refreshToken", newRefreshToken, options)
     .json(new ApiResponse(200, {accessToken,newRefreshToken}));
 })
+
+const changeCurrPassword = asyncHandler(async(req,res) => {
+    const{oldPassword, newPassword} = req.body;
+
+    const user = await User.findById(req.user?._id)
+
+    const isPasswordValid = await user.isPasswordCorrect(oldPassword);
+    if(!isPasswordValid){
+        throw new ApiError(400, "Invalid old password");
+    }
+
+    if(!newPassword){
+        throw new ApiError(400, "Bad request");
+    }
+
+    user.password = newPassword;
+    await user.save({validateBeforeSave: false});
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200,{},"Password is changed successfully"));
+})
 export {registerUser,loginUser,logoutUser,refrAccessToken};
